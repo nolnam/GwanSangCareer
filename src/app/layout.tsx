@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import Script from "next/script";
 import "./globals.css";
 
 const geistSans = localFont({
@@ -23,11 +22,10 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <head>
-        <Script
+        <script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2931046384647465"
           crossOrigin="anonymous"
-          strategy="afterInteractive"
         />
       </head>
       <body className={`${geistSans.variable} antialiased`}>{children}</body>
