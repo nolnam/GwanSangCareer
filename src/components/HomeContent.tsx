@@ -146,9 +146,17 @@ export default function HomeContent() {
         throw new Error(data.error || "서버 오류가 발생했어요.");
       }
 
-      const encoded = btoa(
-        encodeURIComponent(JSON.stringify(data.result))
-      );
+      // Compact format: job\tdesc\ts1,s2,s3,s4,s5
+      const r = data.result;
+      const stats = ["리더십", "창의성", "분석력", "사교성", "끈기"]
+        .map((k) => r.stats[k] ?? 0)
+        .join(",");
+      const compact = `${r.mainJob}\t${r.description}\t${stats}`;
+      const bytes = new TextEncoder().encode(compact);
+      const encoded = btoa(Array.from(bytes, (b) => String.fromCharCode(b)).join(""))
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_")
+        .replace(/=+$/, "");
       localStorage.setItem("gwansang-photo", preview);
       localStorage.setItem("gwansang-result-id", encoded);
 

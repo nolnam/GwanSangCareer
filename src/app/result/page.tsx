@@ -38,8 +38,18 @@ function ResultContent() {
     const dataParam = searchParams.get("data");
     if (dataParam) {
       try {
-        const decoded = JSON.parse(decodeURIComponent(atob(dataParam)));
-        setResult(decoded);
+        // Restore URL-safe base64
+        const b64 = dataParam.replace(/-/g, "+").replace(/_/g, "/");
+        const binary = atob(b64);
+        const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
+        const text = new TextDecoder().decode(bytes);
+        // Compact format: job\tdesc\ts1,s2,s3,s4,s5
+        const [mainJob, description, statsStr] = text.split("\t");
+        const statKeys = ["리더십", "창의성", "분석력", "사교성", "끈기"];
+        const statValues = statsStr.split(",").map(Number);
+        const stats: Record<string, number> = {};
+        statKeys.forEach((k, i) => (stats[k] = statValues[i]));
+        setResult({ mainJob, description, stats });
       } catch {
         setResult(null);
       }

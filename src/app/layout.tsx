@@ -40,20 +40,11 @@ export const metadata: Metadata = {
     title: "관상커리어 - AI 관상 분석으로 찾는 나만의 직업",
     description:
       "사진 한 장으로 AI가 분석하는 나만의 직업 적성. 당신의 얼굴에 숨겨진 커리어 DNA를 찾아보세요.",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "관상커리어 - AI 관상 분석",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "관상커리어 - AI 관상 분석으로 찾는 나만의 직업",
     description: "사진 한 장으로 AI가 분석하는 나만의 직업 적성",
-    images: ["/og-image.png"],
   },
   robots: {
     index: true,

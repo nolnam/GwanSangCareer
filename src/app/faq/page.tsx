@@ -40,10 +40,6 @@ const FAQ_DATA = [
     q: "관상 분석에 사용되는 AI 기술은 무엇인가요?",
     a: "Google의 최신 멀티모달 AI 모델인 Gemini를 사용합니다. 이 AI는 이미지와 텍스트를 동시에 이해할 수 있어, 얼굴의 특징을 종합적으로 분석하고 관상학적 해석을 적용합니다.",
   },
-  {
-    q: "문의사항이 있으면 어디로 연락하나요?",
-    a: "서비스 관련 문의사항은 gwansang.career@gmail.com으로 이메일을 보내주시면 됩니다. 가능한 빠르게 답변드리겠습니다.",
-  },
 ];
 
 function FaqItem({ q, a }: { q: string; a: string }) {
