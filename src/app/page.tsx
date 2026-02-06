@@ -93,7 +93,8 @@ export default function Home() {
 
   const tryNavigate = useCallback(() => {
     if (apiDone.current && animDone.current) {
-      router.push("/result");
+      const encoded = localStorage.getItem("gwansang-result-id") || "";
+      router.push(`/result?data=${encoded}`);
     }
   }, [router]);
 
@@ -148,8 +149,12 @@ export default function Home() {
         throw new Error(data.error || "서버 오류가 발생했어요.");
       }
 
-      localStorage.setItem("gwansang-result", JSON.stringify(data.result));
+      // Encode result as base64 in URL for sharing
+      const encoded = btoa(
+        encodeURIComponent(JSON.stringify(data.result))
+      );
       localStorage.setItem("gwansang-photo", preview);
+      localStorage.setItem("gwansang-result-id", encoded);
 
       apiDone.current = true;
       tryNavigate();

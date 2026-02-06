@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { Suspense } from "react";
 
 interface AnalysisResult {
   mainJob: string;
@@ -24,54 +26,42 @@ function getGrade(avg: number): { label: string; color: string } {
   return { label: "C", color: "from-gray-400 to-gray-500" };
 }
 
-export default function ResultPage() {
+function ResultContent() {
+  const searchParams = useSearchParams();
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [photo, setPhoto] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isOwner, setIsOwner] = useState(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem("gwansang-result");
-    const storedPhoto = localStorage.getItem("gwansang-photo");
-    if (stored) {
+    const dataParam = searchParams.get("data");
+    if (dataParam) {
       try {
-        setResult(JSON.parse(stored));
+        const decoded = JSON.parse(decodeURIComponent(atob(dataParam)));
+        setResult(decoded);
       } catch {
         setResult(null);
       }
     }
-    if (storedPhoto) setPhoto(storedPhoto);
+
+    // Photo is only available for the person who took the analysis (localStorage)
+    const storedPhoto = localStorage.getItem("gwansang-photo");
+    const storedId = localStorage.getItem("gwansang-result-id");
+    if (storedPhoto && storedId === dataParam) {
+      setPhoto(storedPhoto);
+      setIsOwner(true);
+    }
+
     requestAnimationFrame(() => setMounted(true));
-  }, []);
+  }, [searchParams]);
 
   const handleCopyLink = useCallback(async () => {
-    if (!result) return;
-
-    const entries = Object.entries(result.stats);
-    const avg = Math.round(entries.reduce((s, [, v]) => s + v, 0) / entries.length);
-    const g = getGrade(avg);
-    const statsLine = entries
-      .map(([k, v]) => `${STAT_ICONS[k] || "📊"} ${k} ${v}`)
-      .join(" | ");
-
-    const text = [
-      `🔮 관상커리어 AI 분석 결과`,
-      ``,
-      `직업: ${result.mainJob} (${g.label}등급)`,
-      `종합: ${avg}점`,
-      ``,
-      statsLine,
-      ``,
-      `"${result.description}"`,
-      ``,
-      `나도 분석해보기 👉 ${window.location.origin}`,
-    ].join("\n");
-
     try {
-      await navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText(window.location.href);
     } catch {
       const ta = document.createElement("textarea");
-      ta.value = text;
+      ta.value = window.location.href;
       document.body.appendChild(ta);
       ta.select();
       document.execCommand("copy");
@@ -80,7 +70,7 @@ export default function ResultPage() {
 
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-  }, [result]);
+  }, []);
 
   // ── Empty state ──
   if (!result) {
@@ -237,7 +227,7 @@ export default function ResultPage() {
             href="/"
             className="flex-1 py-3.5 rounded-full bg-[#0070f3] text-white text-center font-semibold shadow-lg shadow-blue-500/25 hover:scale-[1.03] hover:shadow-xl hover:shadow-blue-500/30 active:scale-100 transition-all duration-200"
           >
-            다시 분석하기
+            {isOwner ? "다시 분석하기" : "나도 분석해보기"}
           </Link>
           <button
             onClick={handleCopyLink}
@@ -251,10 +241,28 @@ export default function ResultPage() {
               }
             `}
           >
-            {copied ? "✓ 복사 완료!" : "링크 복사하기"}
+            {copied ? "✓ 복사 완료!" : "결과 공유하기"}
           </button>
         </div>
       </main>
     </div>
+  );
+}
+
+export default function ResultPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-white flex items-center justify-center">
+          <div className="flex gap-1.5">
+            <span className="dot dot-1" />
+            <span className="dot dot-2" />
+            <span className="dot dot-3" />
+          </div>
+        </div>
+      }
+    >
+      <ResultContent />
+    </Suspense>
   );
 }
